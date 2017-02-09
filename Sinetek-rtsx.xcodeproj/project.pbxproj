@@ -1,0 +1,322 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9E9EEDAC1E4C65AD00E640DB /* Sinetek_rtsx.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */; };
+		9E9EEDAE1E4C65AD00E640DB /* Sinetek_rtsx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */; };
+		9E9EEDB81E4C6EC100E640DB /* rtsx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDB71E4C6EC100E640DB /* rtsx.cpp */; };
+		9E9EEDBE1E4C869F00E640DB /* sdmmc_cis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDBD1E4C869F00E640DB /* sdmmc_cis.cpp */; };
+		9E9EEDC11E4C89FA00E640DB /* sdmmc_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDC01E4C89FA00E640DB /* sdmmc_io.cpp */; };
+		9E9EEDC31E4C927D00E640DB /* sdmmc_mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDC21E4C927D00E640DB /* sdmmc_mem.cpp */; };
+		9E9EEDC51E4C98AC00E640DB /* sdmmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDC41E4C98AC00E640DB /* sdmmc.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		9E9EEDA81E4C65AD00E640DB /* Sinetek-rtsx.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Sinetek-rtsx.kext"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Sinetek_rtsx.hpp; sourceTree = "<group>"; };
+		9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sinetek_rtsx.cpp; sourceTree = "<group>"; };
+		9E9EEDAF1E4C65AD00E640DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E9EEDB51E4C6CAB00E640DB /* rtsxreg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rtsxreg.h; sourceTree = "<group>"; };
+		9E9EEDB61E4C6D2400E640DB /* rtsxvar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rtsxvar.h; sourceTree = "<group>"; };
+		9E9EEDB71E4C6EC100E640DB /* rtsx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rtsx.cpp; sourceTree = "<group>"; };
+		9E9EEDB91E4C723000E640DB /* sdmmc_ioreg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdmmc_ioreg.h; sourceTree = "<group>"; };
+		9E9EEDBA1E4C72D500E640DB /* sdmmcchip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdmmcchip.h; sourceTree = "<group>"; };
+		9E9EEDBB1E4C730D00E640DB /* sdmmcvar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdmmcvar.h; sourceTree = "<group>"; };
+		9E9EEDBC1E4C73D200E640DB /* sdmmcreg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdmmcreg.h; sourceTree = "<group>"; };
+		9E9EEDBD1E4C869F00E640DB /* sdmmc_cis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdmmc_cis.cpp; sourceTree = "<group>"; };
+		9E9EEDBF1E4C86C800E640DB /* sdmmcdevs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdmmcdevs.h; sourceTree = "<group>"; };
+		9E9EEDC01E4C89FA00E640DB /* sdmmc_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdmmc_io.cpp; sourceTree = "<group>"; };
+		9E9EEDC21E4C927D00E640DB /* sdmmc_mem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdmmc_mem.cpp; sourceTree = "<group>"; };
+		9E9EEDC41E4C98AC00E640DB /* sdmmc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdmmc.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9E9EEDA41E4C65AD00E640DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9E9EED9E1E4C65AD00E640DB = {
+			isa = PBXGroup;
+			children = (
+				9E9EEDAA1E4C65AD00E640DB /* Sinetek-rtsx */,
+				9E9EEDA91E4C65AD00E640DB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9E9EEDA91E4C65AD00E640DB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9E9EEDA81E4C65AD00E640DB /* Sinetek-rtsx.kext */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9E9EEDAA1E4C65AD00E640DB /* Sinetek-rtsx */ = {
+			isa = PBXGroup;
+			children = (
+				9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */,
+				9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */,
+				9E9EEDB71E4C6EC100E640DB /* rtsx.cpp */,
+				9E9EEDB51E4C6CAB00E640DB /* rtsxreg.h */,
+				9E9EEDB61E4C6D2400E640DB /* rtsxvar.h */,
+				9E9EEDC01E4C89FA00E640DB /* sdmmc_io.cpp */,
+				9E9EEDBD1E4C869F00E640DB /* sdmmc_cis.cpp */,
+				9E9EEDC21E4C927D00E640DB /* sdmmc_mem.cpp */,
+				9E9EEDC41E4C98AC00E640DB /* sdmmc.cpp */,
+				9E9EEDB91E4C723000E640DB /* sdmmc_ioreg.h */,
+				9E9EEDBA1E4C72D500E640DB /* sdmmcchip.h */,
+				9E9EEDBB1E4C730D00E640DB /* sdmmcvar.h */,
+				9E9EEDBC1E4C73D200E640DB /* sdmmcreg.h */,
+				9E9EEDBF1E4C86C800E640DB /* sdmmcdevs.h */,
+				9E9EEDAF1E4C65AD00E640DB /* Info.plist */,
+			);
+			path = "Sinetek-rtsx";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		9E9EEDA51E4C65AD00E640DB /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E9EEDAC1E4C65AD00E640DB /* Sinetek_rtsx.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		9E9EEDA71E4C65AD00E640DB /* Sinetek-rtsx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E9EEDB21E4C65AD00E640DB /* Build configuration list for PBXNativeTarget "Sinetek-rtsx" */;
+			buildPhases = (
+				9E9EEDA31E4C65AD00E640DB /* Sources */,
+				9E9EEDA41E4C65AD00E640DB /* Frameworks */,
+				9E9EEDA51E4C65AD00E640DB /* Headers */,
+				9E9EEDA61E4C65AD00E640DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Sinetek-rtsx";
+			productName = "Sinetek-rtsx";
+			productReference = 9E9EEDA81E4C65AD00E640DB /* Sinetek-rtsx.kext */;
+			productType = "com.apple.product-type.kernel-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9E9EED9F1E4C65AD00E640DB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = sinetek;
+				TargetAttributes = {
+					9E9EEDA71E4C65AD00E640DB = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 9E9EEDA21E4C65AD00E640DB /* Build configuration list for PBXProject "Sinetek-rtsx" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9E9EED9E1E4C65AD00E640DB;
+			productRefGroup = 9E9EEDA91E4C65AD00E640DB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9E9EEDA71E4C65AD00E640DB /* Sinetek-rtsx */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9E9EEDA61E4C65AD00E640DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9E9EEDA31E4C65AD00E640DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E9EEDC11E4C89FA00E640DB /* sdmmc_io.cpp in Sources */,
+				9E9EEDBE1E4C869F00E640DB /* sdmmc_cis.cpp in Sources */,
+				9E9EEDC31E4C927D00E640DB /* sdmmc_mem.cpp in Sources */,
+				9E9EEDB81E4C6EC100E640DB /* rtsx.cpp in Sources */,
+				9E9EEDC51E4C98AC00E640DB /* sdmmc.cpp in Sources */,
+				9E9EEDAE1E4C65AD00E640DB /* Sinetek_rtsx.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9E9EEDB01E4C65AD00E640DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		9E9EEDB11E4C65AD00E640DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9E9EEDB31E4C65AD00E640DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0d1;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					RTSX_DEBUG,
+					SDMMC_DEBUG,
+				);
+				INFOPLIST_FILE = "Sinetek-rtsx/Info.plist";
+				MODULE_NAME = com.sinet3k.Sinetek_rtsx;
+				MODULE_VERSION = 1.0.0d1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sinet3k.Sinetek-rtsx";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = kext;
+			};
+			name = Debug;
+		};
+		9E9EEDB41E4C65AD00E640DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.0.0d1;
+				INFOPLIST_FILE = "Sinetek-rtsx/Info.plist";
+				MODULE_NAME = com.sinet3k.Sinetek_rtsx;
+				MODULE_VERSION = 1.0.0d1;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sinet3k.Sinetek-rtsx";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = kext;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9E9EEDA21E4C65AD00E640DB /* Build configuration list for PBXProject "Sinetek-rtsx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E9EEDB01E4C65AD00E640DB /* Debug */,
+				9E9EEDB11E4C65AD00E640DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E9EEDB21E4C65AD00E640DB /* Build configuration list for PBXNativeTarget "Sinetek-rtsx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E9EEDB31E4C65AD00E640DB /* Debug */,
+				9E9EEDB41E4C65AD00E640DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9E9EED9F1E4C65AD00E640DB /* Project object */;
+}
