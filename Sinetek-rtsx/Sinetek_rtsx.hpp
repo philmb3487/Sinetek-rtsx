@@ -13,6 +13,7 @@
 /* Number of registers to save for suspend/resume in terms of their ranges. */
 #define RTSX_NREG ((0XFDAE - 0XFDA0) + (0xFD69 - 0xFD32) + (0xFE34 - 0xFE20))
 
+class SDDisk;
 struct rtsx_softc : public IOPCIDevice
 {
 
@@ -26,6 +27,9 @@ public:
 	void rtsx_pci_attach();
 	void rtsx_pci_detach();
 	
+	void blk_attach();
+	void blk_detach();
+	
 	// ** //
 	IOPCIDevice *		provider_;
 	IOWorkLoop *		workloop_;
@@ -33,12 +37,15 @@ public:
 	IOMemoryDescriptor *	memory_descriptor_;
 	IOInterruptEventSource *intr_source_;
 	
+	SDDisk *			sddisk_;
+	struct sdmmc_task	read_task_;
+	
 	/*
 	 * rtsx_softc variables.
 	 */
 	int		flags;
-	uint32_t	intr_status;
-	u_int8_t	regs[RTSX_NREG];/* host controller state */
+	uint32_t		intr_status;
+	u_int8_t		regs[RTSX_NREG];/* host controller state */
 	u_int32_t	regs4[6];	/* host controller state */
 	IOBufferMemoryDescriptor * dmap_cmd, *dmap_data;
 	

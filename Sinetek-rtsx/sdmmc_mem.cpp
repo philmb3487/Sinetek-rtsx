@@ -54,8 +54,8 @@ int	sdmmc_mem_sd_init(struct sdmmc_softc *, struct sdmmc_function *);
 int	sdmmc_mem_mmc_init(struct sdmmc_softc *, struct sdmmc_function *);
 //int	sdmmc_mem_single_read_block(struct sdmmc_function *, int, u_char *,
 //				    size_t);
-//int	sdmmc_mem_read_block_subr(struct sdmmc_function *, bus_dmamap_t,
-//				  int, u_char *, size_t);
+int	sdmmc_mem_read_block_subr(struct sdmmc_function *,
+				  int, u_char *, size_t);
 //int	sdmmc_mem_single_write_block(struct sdmmc_function *, int, u_char *,
 //				     size_t);
 //int	sdmmc_mem_write_block_subr(struct sdmmc_function *, bus_dmamap_t,
@@ -875,7 +875,7 @@ sdmmc_mem_set_blocklen(struct sdmmc_softc *sc, struct sdmmc_function *sf)
 }
 
 int
-sdmmc_mem_read_block_subr(struct sdmmc_function *sf, void* dmap,
+sdmmc_mem_read_block_subr(struct sdmmc_function *sf,
 			  int blkno, u_char *data, size_t datalen)
 {
 	struct sdmmc_softc *sc = sf->sc;
@@ -937,7 +937,7 @@ sdmmc_mem_single_read_block(struct sdmmc_function *sf, int blkno, u_char *data,
 	int i;
 	
 	for (i = 0; i < datalen / sf->csd.sector_size; i++) {
-		error = sdmmc_mem_read_block_subr(sf, NULL,  blkno + i,
+		error = sdmmc_mem_read_block_subr(sf, blkno + i,
 						  data + i * sf->csd.sector_size, sf->csd.sector_size);
 		if (error)
 			break;
@@ -959,7 +959,7 @@ sdmmc_mem_read_block(struct sdmmc_function *sf, int blkno, u_char *data,
 	}
 	
 	if (!ISSET(sc->sc_caps, SMC_CAPS_DMA)) {
-		error = sdmmc_mem_read_block_subr(sf, NULL, blkno,
+		error = sdmmc_mem_read_block_subr(sf, blkno,
 						  data, datalen);
 		goto out;
 	}

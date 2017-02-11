@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9E11DE591E4CB19C00AF36C8 /* SDDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E11DE571E4CB19C00AF36C8 /* SDDisk.cpp */; };
+		9E11DE5A1E4CB19C00AF36C8 /* SDDisk.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 9E11DE581E4CB19C00AF36C8 /* SDDisk.hpp */; };
 		9E9EEDAC1E4C65AD00E640DB /* Sinetek_rtsx.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */; };
 		9E9EEDAE1E4C65AD00E640DB /* Sinetek_rtsx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */; };
 		9E9EEDB81E4C6EC100E640DB /* rtsx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EEDB71E4C6EC100E640DB /* rtsx.cpp */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9E11DE571E4CB19C00AF36C8 /* SDDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SDDisk.cpp; sourceTree = "<group>"; };
+		9E11DE581E4CB19C00AF36C8 /* SDDisk.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SDDisk.hpp; sourceTree = "<group>"; };
 		9E9EEDA81E4C65AD00E640DB /* Sinetek-rtsx.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Sinetek-rtsx.kext"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Sinetek_rtsx.hpp; sourceTree = "<group>"; };
 		9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sinetek_rtsx.cpp; sourceTree = "<group>"; };
@@ -65,6 +69,8 @@
 		9E9EEDAA1E4C65AD00E640DB /* Sinetek-rtsx */ = {
 			isa = PBXGroup;
 			children = (
+				9E11DE571E4CB19C00AF36C8 /* SDDisk.cpp */,
+				9E11DE581E4CB19C00AF36C8 /* SDDisk.hpp */,
 				9E9EEDAB1E4C65AD00E640DB /* Sinetek_rtsx.hpp */,
 				9E9EEDAD1E4C65AD00E640DB /* Sinetek_rtsx.cpp */,
 				9E9EEDB71E4C6EC100E640DB /* rtsx.cpp */,
@@ -91,6 +97,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E11DE5A1E4CB19C00AF36C8 /* SDDisk.hpp in Headers */,
 				9E9EEDAC1E4C65AD00E640DB /* Sinetek_rtsx.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -164,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E9EEDC11E4C89FA00E640DB /* sdmmc_io.cpp in Sources */,
+				9E11DE591E4CB19C00AF36C8 /* SDDisk.cpp in Sources */,
 				9E9EEDBE1E4C869F00E640DB /* sdmmc_cis.cpp in Sources */,
 				9E9EEDC31E4C927D00E640DB /* sdmmc_mem.cpp in Sources */,
 				9E9EEDB81E4C6EC100E640DB /* rtsx.cpp in Sources */,
@@ -270,7 +278,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
-					RTSX_DEBUG,
 					SDMMC_DEBUG,
 				);
 				INFOPLIST_FILE = "Sinetek-rtsx/Info.plist";
@@ -315,6 +322,7 @@
 				9E9EEDB41E4C65AD00E640DB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

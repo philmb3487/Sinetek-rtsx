@@ -34,7 +34,7 @@ void splx(int);
 #define	CLR(t, f)	((t) &= ~(f))
 
 /* Host controller functions called by the attachment driver. */
-int	rtsx_attach(struct rtsx_softc *, int);
+int	rtsx_attach(struct rtsx_softc *);
 //int	rtsx_activate(struct device *, int);
 int	rtsx_intr(void *);
 

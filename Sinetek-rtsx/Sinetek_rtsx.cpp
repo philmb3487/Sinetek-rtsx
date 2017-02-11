@@ -10,6 +10,7 @@ OSDefineMetaClassAndStructors(rtsx_softc, super);
 
 #include "rtsxreg.h"
 #include "rtsxvar.h"
+#include "SDDisk.hpp"
 
 bool rtsx_softc::start(IOService *provider)
 {
@@ -100,16 +101,16 @@ void rtsx_softc::rtsx_pci_attach()
 			break;
 	}
 	
-//	int error = rtsx_attach(*this); XXX
-//	if (!error)
-//	{
+	int error = rtsx_attach(this);
+	if (!error)
+	{
 //		pci_present_and_attached_ = true;
-//	}
+	}
 }
 
 void rtsx_softc::rtsx_pci_detach()
 {
-//	rtsx_detach(); XXX
+//	rtsx_detach();
 	
 	workloop_->removeEventSource(intr_source_);
 	intr_source_->release();
@@ -147,4 +148,25 @@ void rtsx_softc::task_execute_one_impl_(OSObject *target, IOTimerEventSource *se
 	}
 }
 
+/**
+ *  Attach the macOS portion of the driver: block storage.
+ *
+ *  That block device will hand us back calls such as read/write blk.
+ */
+void rtsx_softc::blk_attach()
+{
+	printf("rtsx: blk_attack()\n");
+	
+	sddisk_ = new SDDisk();
+	sddisk_->init(this);
+	sddisk_->attach(this);
+	sddisk_->release();
+	sddisk_->registerService();
+}
 
+void rtsx_softc::blk_detach()
+{
+	printf("rtsx: blk_detach()\n");
+
+	sddisk_->terminate();
+}

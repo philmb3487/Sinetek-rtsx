@@ -35,10 +35,9 @@
 
 #include "Sinetek_rtsx.hpp"
 
-int	sdmmc_match(struct device *, void *, void *);
 void	sdmmc_attach(struct device *, struct device *, void *);
 int	sdmmc_detach(struct device *, int);
-int	sdmmc_activate(struct device *, int);
+//int	sdmmc_activate(struct device *, int);
 
 void	sdmmc_create_thread(void *);
 void	sdmmc_task_thread(void *);
@@ -65,64 +64,50 @@ void sdmmc_dump_command(struct sdmmc_softc *, struct sdmmc_command *);
 extern int splsdmmc();
 extern void splx(int);
 
-//void
-//sdmmc_attach(struct device *parent, struct device *self, void *aux)
-//{
-//	struct sdmmc_softc *sc = (struct sdmmc_softc *)self;
-//	struct sdmmcbus_attach_args *saa = aux;
-//	int error;
-//	
-//	if (ISSET(saa->caps, SMC_CAPS_8BIT_MODE))
-//		printf(": 8-bit");
-//	else if (ISSET(saa->caps, SMC_CAPS_4BIT_MODE))
-//		printf(": 4-bit");
-//	else
-//		printf(": 1-bit");
-//	if (ISSET(saa->caps, SMC_CAPS_SD_HIGHSPEED))
-//		printf(", sd high-speed");
-//	if (ISSET(saa->caps, SMC_CAPS_MMC_HIGHSPEED))
-//		printf(", mmc high-speed");
-//	if (ISSET(saa->caps, SMC_CAPS_DMA))
-//		printf(", dma");
-//	printf("\n");
-//	
-//	sc->sct = saa->sct;
-//	sc->sch = saa->sch;
-//	sc->sc_dmat = saa->dmat;
-//	sc->sc_flags = saa->flags;
-//	sc->sc_caps = saa->caps;
-//	sc->sc_max_xfer = saa->max_xfer;
-//	
-//	if (ISSET(sc->sc_caps, SMC_CAPS_DMA)) {
-//		error = bus_dmamap_create(sc->sc_dmat, MAXPHYS, SDMMC_MAXNSEGS,
-//					  MAXPHYS, 0, BUS_DMA_NOWAIT|BUS_DMA_ALLOCNOW, &sc->sc_dmap);
-//		if (error) {
-//			printf("%s: can't create DMA map\n", DEVNAME(sc));
-//			return;
-//		}
-//	}
-//	
-//	SIMPLEQ_INIT(&sc->sf_head);
-//	TAILQ_INIT(&sc->sc_tskq);
-//	TAILQ_INIT(&sc->sc_intrq);
-//	sdmmc_init_task(&sc->sc_discover_task, sdmmc_discover_task, sc);
-//	sdmmc_init_task(&sc->sc_intr_task, sdmmc_intr_task, sc);
-//	rw_init(&sc->sc_lock, DEVNAME(sc));
-//	
-//#ifdef SDMMC_IOCTL
-//	if (bio_register(self, sdmmc_ioctl) != 0)
-//		printf("%s: unable to register ioctl\n", DEVNAME(sc));
-//#endif
-//	
-//	/*
-//	 * Create the event thread that will attach and detach cards
-//	 * and perform other lengthy operations.  Enter config_pending
-//	 * state until the discovery task has run for the first time.
-//	 */
-//	SET(sc->sc_flags, SMF_CONFIG_PENDING);
-//	config_pending_incr();
-//	kthread_create_deferred(sdmmc_create_thread, sc);
-//}
+void
+sdmmc_attach(struct sdmmc_softc *sc)
+{
+	int error;
+	
+	if (ISSET(sc->sc_caps, SMC_CAPS_8BIT_MODE))
+		printf(": 8-bit");
+	else if (ISSET(sc->sc_caps, SMC_CAPS_4BIT_MODE))
+		printf(": 4-bit");
+	else
+		printf(": 1-bit");
+	if (ISSET(sc->sc_caps, SMC_CAPS_SD_HIGHSPEED))
+		printf(", sd high-speed");
+	if (ISSET(sc->sc_caps, SMC_CAPS_MMC_HIGHSPEED))
+		printf(", mmc high-speed");
+	if (ISSET(sc->sc_caps, SMC_CAPS_DMA))
+		printf(", dma");
+	printf("\n");
+	
+	if (ISSET(sc->sc_caps, SMC_CAPS_DMA)) {
+		error = ENOTSUP;
+		if (error) {
+			printf("%s: can't create DMA map\n", DEVNAME(sc));
+			return;
+		}
+	}
+	
+	STAILQ_INIT(&sc->sf_head);
+	TAILQ_INIT(&sc->sc_tskq);
+	TAILQ_INIT(&sc->sc_intrq);
+	sdmmc_init_task(&sc->sc_discover_task, sdmmc_discover_task, sc);
+	
+#ifdef SDMMC_IOCTL
+	if (bio_register(self, sdmmc_ioctl) != 0)
+		printf("%s: unable to register ioctl\n", DEVNAME(sc));
+#endif
+	
+	/*
+	 * Create the event thread that will attach and detach cards
+	 * and perform other lengthy operations.  Enter config_pending
+	 * state until the discovery task has run for the first time.
+	 */
+	SET(sc->sc_flags, SMF_CONFIG_PENDING);
+}
 
 int
 sdmmc_detach(struct device *self, int flags)
@@ -221,8 +206,8 @@ sdmmc_add_task(struct sdmmc_softc *sc, struct sdmmc_task *task)
 	TAILQ_INSERT_TAIL(&sc->sc_tskq, task, next);
 	task->onqueue = 1;
 	task->sc = sc;
-	wakeup(&sc->sc_tskq);
-	sc->task_execute_one_->setTimeoutTicks(0);
+//	wakeup(&sc->sc_tskq);
+	sc->task_execute_one_->setTimeoutTicks(100 / 5);
 	splx(s);
 }
 
@@ -311,8 +296,8 @@ sdmmc_card_attach(struct sdmmc_softc *sc)
 	}
 	
 	/* Attach SCSI emulation for memory cards. */
-//	if (ISSET(sc->sc_flags, SMF_MEM_MODE))
-//	XXX	sdmmc_scsi_attach(sc);
+	if (ISSET(sc->sc_flags, SMF_MEM_MODE))
+		sc->blk_attach();
 	
 	/* Attach I/O function drivers. */
 	if (ISSET(sc->sc_flags, SMF_IO_MODE))
@@ -341,8 +326,8 @@ sdmmc_card_detach(struct sdmmc_softc *sc, int flags)
 			sdmmc_io_detach(sc);
 		
 		/* Detach the SCSI emulation for memory cards. */
-//	XXX 	if (ISSET(sc->sc_flags, SMF_MEM_MODE))
-//			sdmmc_scsi_detach(sc);
+		if (ISSET(sc->sc_flags, SMF_MEM_MODE))
+			sc->blk_detach();
 		
 		CLR(sc->sc_flags, SMF_CARD_ATTACHED);
 	}

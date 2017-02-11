@@ -82,7 +82,7 @@ splx(int)
  */
 extern int hz;                  /* system clock's frequency */
 
-const static int VERY_VERBOSE_IO = 1;
+const static int VERY_VERBOSE_IO = 0;
 uint32_t
 READ4(rtsx_softc *sc, uint32_t reg)
 {
@@ -172,6 +172,13 @@ void	rtsx_restore_regs(struct rtsx_softc *);
 #define DPRINTF(n,s)	do {} while(0)
 #endif
 
+/*
+ * Forward decls.
+ */
+void sdmmc_attach(struct sdmmc_softc *sc);
+int  sdmmc_detach(struct sdmmc_softc *sc, int flags);
+void sdmmc_needs_discover(struct device *self);
+
 //struct sdmmc_chip_functions rtsx_functions = {
 //	/* host controller reset */
 //	rtsx_host_reset,
@@ -204,57 +211,35 @@ void	rtsx_restore_regs(struct rtsx_softc *);
 /*
  * Called by attachment driver.
  */
-//int
-//rtsx_attach(struct rtsx_softc *sc, bus_space_tag_t iot,
-//	    bus_space_handle_t ioh, bus_size_t iosize, bus_dma_tag_t dmat, int flags)
-//{
-//	struct sdmmcbus_attach_args saa;
-//	u_int32_t sdio_cfg;
-//	
-//	sc->iot = iot;
-//	sc->ioh = ioh;
-//	sc->dmat = dmat;
-//	sc->flags = flags;
-//	
-//	if (rtsx_init(sc, 1))
-//		return 1;
-//	
-//	if (rtsx_read_cfg(sc, 0, RTSX_SDIOCFG_REG, &sdio_cfg) == 0) {
-//		if ((sdio_cfg & RTSX_SDIOCFG_SDIO_ONLY) ||
-//		    (sdio_cfg & RTSX_SDIOCFG_HAVE_SDIO))
-//			sc->flags |= RTSX_F_SDIO_SUPPORT;
-//	}
-//	
-//	if (bus_dmamap_create(sc->dmat, RTSX_HOSTCMD_BUFSIZE, 1,
-//			      RTSX_DMA_MAX_SEGSIZE, 0, BUS_DMA_NOWAIT,
-//			      &sc->dmap_cmd) != 0)
-//		return 1;
-//	if (bus_dmamap_create(sc->dmat, RTSX_DMA_DATA_BUFSIZE, 1,
-//			      RTSX_DMA_MAX_SEGSIZE, 0, BUS_DMA_NOWAIT,
-//			      &sc->dmap_data) != 0)
-//		return 1;
-//	
-//	/*
-//	 * Attach the generic SD/MMC bus driver.  (The bus driver must
-//	 * not invoke any chipset functions before it is attached.)
-//	 */
-//	bzero(&saa, sizeof(saa));
-//	saa.saa_busname = "sdmmc";
-//	saa.sct = &rtsx_functions;
-//	saa.sch = sc;
-//	saa.flags = SMF_STOP_AFTER_MULTIPLE;
-//	saa.caps = SMC_CAPS_4BIT_MODE;
-//	
-//	sc->sdmmc = config_found(&sc->sc_dev, &saa, NULL);
-//	if (sc->sdmmc == NULL)
-//		return 1;
-//	
-//	/* Now handle cards discovered during attachment. */
-//	if (ISSET(sc->flags, RTSX_F_CARD_PRESENT))
-//		rtsx_card_insert(sc);
-//	
-//	return 0;
-//}
+int
+rtsx_attach(struct rtsx_softc *sc)
+{
+	u_int32_t sdio_cfg;
+	
+	if (rtsx_init(sc, 1))
+		return 1;
+	
+	if (rtsx_read_cfg(sc, 0, RTSX_SDIOCFG_REG, &sdio_cfg) == 0) {
+		if ((sdio_cfg & RTSX_SDIOCFG_SDIO_ONLY) ||
+		    (sdio_cfg & RTSX_SDIOCFG_HAVE_SDIO))
+			sc->flags |= RTSX_F_SDIO_SUPPORT;
+	}
+	
+	/*
+	 * Attach the generic SD/MMC bus driver.  (The bus driver must
+	 * not invoke any chipset functions before it is attached.)
+	 */
+	sc->sc_flags = SMF_STOP_AFTER_MULTIPLE;
+	sc->sc_caps = SMC_CAPS_4BIT_MODE;
+	
+	sdmmc_attach(sc);
+	
+	/* Now handle cards discovered during attachment. */
+	if (ISSET(sc->flags, RTSX_F_CARD_PRESENT))
+		rtsx_card_insert(sc);
+	
+	return 0;
+}
 
 int
 rtsx_init(struct rtsx_softc *sc, int attaching)
@@ -1005,6 +990,7 @@ rtsx_xfer(struct rtsx_softc *sc, struct sdmmc_command *cmd, u_int32_t *cmdbuf)
 	int ncmd, s, dma_dir, error, rsegs, tmode;
 	int read = ISSET(cmd->c_flags, SCF_CMD_READ);
 	u_int8_t cfg2;
+	uint64_t physAddr, physSize;
 	
 	DPRINTF(3,("%s: %s xfer: %d bytes with block size %d\n", DEVNAME(sc),
 	    read ? "read" : "write",
@@ -1089,13 +1075,16 @@ rtsx_xfer(struct rtsx_softc *sc, struct sdmmc_command *cmd, u_int32_t *cmdbuf)
 	/* Allocate and map DMA memory for data transfer. */
 	IOBufferMemoryDescriptor * data_buffer;
 	data_buffer = IOBufferMemoryDescriptor::inTaskWithPhysicalMask(
-								       kernel_task,
-								       kIOMemoryPhysicallyContiguous | kIOMapInhibitCache,
-								       cmd->c_datalen,
-								       0x00000000ffffffffull);
+					kernel_task,
+					kIODirectionInOut | kIOMemoryPhysicallyContiguous | kIOMapInhibitCache,
+					cmd->c_datalen,
+					0x00000000ffffffffull);
 	if (!data_buffer)
 		goto ret;
 	datakvap = (caddr_t)data_buffer->getBytesNoCopy();
+	physAddr = data_buffer->getPhysicalSegment(0, &physSize);
+	if (physSize == 0)
+		goto ret;
 	
 	/* If this is a write, copy data from sdmmc-provided buffer. */
 	if (!read)
@@ -1107,9 +1096,9 @@ rtsx_xfer(struct rtsx_softc *sc, struct sdmmc_command *cmd, u_int32_t *cmdbuf)
 	s = splsdmmc();
 	
 	/* Tell the chip where the data buffer is and run the transfer. */
-	WRITE4(sc, RTSX_HDBAR, sc->dmap_data->getPhysicalAddress());
+	WRITE4(sc, RTSX_HDBAR, physAddr);
 	WRITE4(sc, RTSX_HDBCTLR, RTSX_TRIG_DMA | (read ? RTSX_DMA_READ : 0) |
-	       (sc->dmap_data->getLength() & 0x00ffffff));
+	       (physSize & 0x00ffffff));
 	
 	splx(s);
 	
@@ -1148,7 +1137,7 @@ rtsx_exec_command(sdmmc_chipset_handle_t sch, struct sdmmc_command *cmd)
 	int ncmd;
 	int error = 0;
 	
-	DPRINTF(3,("%s: executing cmd %hu\n", DEVNAME(sc), cmd->c_opcode));
+	DPRINTF(3,("%s: executing cmd %u\n", DEVNAME(sc), cmd->c_opcode));
 	
 	/* Refuse SDIO probe if the chip doesn't support SDIO. */
 	if (cmd->c_opcode == SD_IO_SEND_OP_COND &&
@@ -1337,8 +1326,7 @@ rtsx_card_insert(struct rtsx_softc *sc)
 	(void)rtsx_led_enable(sc);
 	
 	/* Schedule card discovery task. */
-//	sdmmc_needs_discover(sc->sdmmc);
-	printf("sdmmc needs discover\n");
+	sdmmc_needs_discover((struct device *)sc);
 }
 
 void
@@ -1350,8 +1338,7 @@ rtsx_card_eject(struct rtsx_softc *sc)
 	(void)rtsx_led_disable(sc);
 	
 	/* Schedule card discovery task. */
-//	sdmmc_needs_discover(sc->sdmmc);
-	printf("sdmmc needs discover\n");
+	sdmmc_needs_discover((struct device *)sc);
 }
 
 /*
