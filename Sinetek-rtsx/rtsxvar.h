@@ -44,6 +44,11 @@ int	rtsx_intr(void *);
 #define	RTSX_F_5209		0x04
 #define	RTSX_F_5229		0x08
 #define	RTSX_F_5229_TYPE_C	0x10
+/*
+ * syscl - as of v 1.4 added support: 0x525A
+ */
+#define    RTSX_F_525A        0x20
+/* end of 1.4 change */
 
 #define RTSX_PCI_BAR	0x10
 
