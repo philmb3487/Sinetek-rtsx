@@ -55,4 +55,10 @@ int	rtsx_intr(void *);
 #define PCI_PRODUCT_REALTEK_RTL8411B    0x5287          /* RTL8411B PCI-E Card Reader */
 #define PCI_PRODUCT_REALTEK_RTL8411     0x5289          /* RTL8411 PCI-E Card Reader */
 
+/*
+ * syscl - add extra support for new card reader here
+ */
+#define PCI_PRODUCT_REALTEK_RTS525A     0x525A          /* RTS525A PCI-E Card Reader (XPS 13/15 Series) */
+
+
 #endif
