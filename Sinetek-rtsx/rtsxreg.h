@@ -1,4 +1,4 @@
-/*	$OpenBSD: rtsxreg.h,v 1.3 2013/11/26 20:33:16 deraadt Exp $	*/
+/*	$OpenBSD: rtsxreg.h,v 1.4 2017/09/06 13:07:38 jcs Exp $	*/
 
 /*
  * Copyright (c) 2006 Uwe Stuehler <uwe@openbsd.org>
@@ -98,13 +98,13 @@
 #define	RTSX_CARD_DRIVE_SEL	0xFE53
 
 /* Card clock. */
-#define	RTSX_CARD_CLK_EN	0xFD69
+#define	RTSX_CARD_CLK_EN	0xFD69 
 #define	RTSX_XD_CLK_EN		0x02
 #define	RTSX_SD_CLK_EN		0x04
 #define	RTSX_MS_CLK_EN		0x08
 #define	RTSX_SPI_CLK_EN		0x10
 #define	RTSX_CARD_CLK_EN_ALL	\
-(RTSX_XD_CLK_EN|RTSX_SD_CLK_EN|RTSX_MS_CLK_EN|RTSX_SPI_CLK_EN)
+    (RTSX_XD_CLK_EN|RTSX_SD_CLK_EN|RTSX_MS_CLK_EN|RTSX_SPI_CLK_EN)
 
 #define RTSX_SDIO_CTRL		0xFD6B
 #define RTSX_SDIO_BUS_CTRL	0x01
@@ -303,14 +303,14 @@
 #define	RTSX_TM_AUTO_WRITE3	0x01
 
 /* Like AUTO_WRITE3, plus automatically send CMD 12 when done.
- * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */
+ * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */ 
 #define	RTSX_TM_AUTO_WRITE4	0x02
 
 /* Read (SD_BYTE_CNT * SD_BLOCK_CNT) bytes from card into ring buffer. */
 #define	RTSX_TM_AUTO_READ3	0x05
 
 /* Like AUTO_READ3, plus automatically send CMD 12 when done.
- * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */
+ * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */ 
 #define	RTSX_TM_AUTO_READ4	0x06
 
 /* Send an SD command described in SD_CMD{0,1,2,3,4} to the card and put
@@ -320,7 +320,7 @@
 
 /* Send write command, get response from the card, write data from ring
  * buffer to card, and send CMD 12 when done.
- * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */
+ * The response to CMD 12 is written to SD_CMD{0,1,2,3,4}. */ 
 #define	RTSX_TM_AUTO_WRITE1	0x09
 
 /* Like AUTO_WRITE1 except no CMD 12 is sent. */
@@ -367,7 +367,7 @@
 #define	RTSX_MS_OUTPUT_EN	0x08
 #define	RTSX_SPI_OUTPUT_EN	0x10
 #define	RTSX_CARD_OUTPUT_EN	(RTSX_XD_OUTPUT_EN|RTSX_SD_OUTPUT_EN|\
-RTSX_MS_OUTPUT_EN)
+				RTSX_MS_OUTPUT_EN)
 
 #define	RTSX_CARD_DATA_SOURCE	0xFD5B
 #define	RTSX_RING_BUFFER	0x00
@@ -387,8 +387,8 @@ RTSX_MS_OUTPUT_EN)
 #define	RTSX_PPBUF_SIZE		256
 
 #define	RTSX_SUPPORT_VOLTAGE	(MMC_OCR_3_3V_3_4V|MMC_OCR_3_2V_3_3V|\
-MMC_OCR_3_1V_3_2V|MMC_OCR_3_0V_3_1V|\
-SD_OCR_SDHC_CAP)
+				MMC_OCR_3_1V_3_2V|MMC_OCR_3_0V_3_1V|\
+				SD_OCR_SDHC_CAP)
 
 #define	RTSX_CFG_PCI		0x1C
 #define	RTSX_CFG_ASIC		0x10
@@ -501,6 +501,14 @@ SD_OCR_SDHC_CAP)
 
 #define	RTSX_DUMMY_REG		0xFE90
 
+#define	RTSX_LDO_VCC_CFG1	0xFF73
+#define	RTSX_LDO_VCC_REF_TUNE_MASK	0x30
+#define	RTSX_LDO_VCC_REF_1V2		0x20
+#define	RTSX_LDO_VCC_TUNE_MASK		0x07
+#define	RTSX_LDO_VCC_1V8		0x04
+#define	RTSX_LDO_VCC_3V3		0x07
+#define	RTSX_LDO_VCC_LMT_EN		0x08
+
 #define	RTSX_SG_INT		0x04
 #define	RTSX_SG_END		0x02
 #define	RTSX_SG_VALID		0x01
@@ -515,4 +523,3 @@ SD_OCR_SDHC_CAP)
 #define	RTSX_IC_VERSION_D	0x03
 
 #endif
-

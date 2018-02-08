@@ -44,6 +44,11 @@ int	rtsx_intr(void *);
 #define	RTSX_F_5209		0x04
 #define	RTSX_F_5229		0x08
 #define	RTSX_F_5229_TYPE_C	0x10
+/*
+ * syscl - as of v 1.4 added support: 0x525A
+ */
+#define    RTSX_F_525A        0x20
+/* end of 1.4 change */
 
 #define RTSX_PCI_BAR	0x10
 
@@ -54,5 +59,11 @@ int	rtsx_intr(void *);
 #define PCI_PRODUCT_REALTEK_RTL8402     0x5286          /* RTL8402 PCI-E Card Reader */
 #define PCI_PRODUCT_REALTEK_RTL8411B    0x5287          /* RTL8411B PCI-E Card Reader */
 #define PCI_PRODUCT_REALTEK_RTL8411     0x5289          /* RTL8411 PCI-E Card Reader */
+
+/*
+ * syscl - add extra support for new card reader here
+ */
+#define PCI_PRODUCT_REALTEK_RTS525A     0x525A          /* RTS525A PCI-E Card Reader (XPS 13/15 Series) */
+
 
 #endif
