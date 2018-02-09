@@ -56,12 +56,23 @@ void rtsx_softc::rtsx_pci_attach()
 {
 	uint device_id;
 	uint32_t flags;
+    int bar = RTSX_PCI_BAR;
 	
 	if ((provider_->extendedConfigRead16(RTSX_CFG_PCI) & RTSX_CFG_ASIC) != 0)
 	{
 		printf("no asic\n");
 		return;
 	}
+    
+    /* Map device interrupt. */
+    intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
+    if (!intr_source_)
+    {
+        printf("can't map interrupt source\n");
+        return;
+    }
+    workloop_->addEventSource(intr_source_);
+    intr_source_->enable();
 	
 	/* Enable the device */
 	provider_->setBusMasterEnable(true);
@@ -74,36 +85,31 @@ void rtsx_softc::rtsx_pci_attach()
 		printf("pci_set_powerstate_D0: domain D0 not received.\n");
 		return;
 	}
+    
+    /* Get the vendor and try to match on it. */
+    device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
+    switch (device_id) {
+        case PCI_PRODUCT_REALTEK_RTS5209:
+            flags = RTSX_F_5209;
+            break;
+        case PCI_PRODUCT_REALTEK_RTS5229:
+        case PCI_PRODUCT_REALTEK_RTS5249:
+            flags = RTSX_F_5229;
+            break;
+        case PCI_PRODUCT_REALTEK_RTS525A:
+            /* syscl - RTS525A */
+            flags = RTSX_F_525A;
+            bar = RTSX_PCI_BAR_525A;
+            break;
+        default:
+            flags = 0;
+            break;
+    }
 	
-	/* Map device memory. */
-	map_ = provider_->mapDeviceMemoryWithRegister(RTSX_PCI_BAR);
+	/* Map device memory with register. */
+	map_ = provider_->mapDeviceMemoryWithRegister(bar);
 	if (!map_) return;
 	memory_descriptor_ = map_->getMemoryDescriptor();
-	
-	/* Map device interrupt. */
-	intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
-	if (!intr_source_) return;
-	workloop_->addEventSource(intr_source_);
-	intr_source_->enable();
-	
-	/* Get the vendor and try to match on it. */
-	device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
-	switch (device_id) {
-		case PCI_PRODUCT_REALTEK_RTS5209:
-			flags = RTSX_F_5209;
-			break;
-		case PCI_PRODUCT_REALTEK_RTS5229:
-		case PCI_PRODUCT_REALTEK_RTS5249:
-			flags = RTSX_F_5229;
-			break;
-		case PCI_PRODUCT_REALTEK_RTS525A:
-			/* syscl - RTS525A */
-			flags = RTSX_F_525A;
-			break;
-		default:
-			flags = 0;
-			break;
-	}
 	
 	int error = rtsx_attach(this);
 	if (!error)

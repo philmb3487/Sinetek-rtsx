@@ -491,6 +491,11 @@ rtsx_bus_power_on(struct rtsx_softc *sc)
 {
 	u_int8_t enable3;
 	
+    /* syscl - added RTS525A support here */
+    if (sc->flags & RTSX_F_525A)
+        rtsx_write(sc, RTSX_LDO_VCC_CFG1, RTSX_LDO_VCC_TUNE_MASK,
+                   RTSX_LDO_VCC_3V3);
+    
 	/* Select SD card. */
 	RTSX_WRITE(sc, RTSX_CARD_SELECT, RTSX_SD_MOD_SEL);
 	RTSX_WRITE(sc, RTSX_CARD_SHARE_MODE, RTSX_CARD_SHARE_48_SD);
