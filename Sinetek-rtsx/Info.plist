@@ -29,7 +29,7 @@
 			<key>IOProbeScore</key>
 			<integer>1000</integer>
 			<key>IOPCIMatch</key>
-			<string>0x522710EC</string>
+			<string>0x520910EC 0x522710EC 0x522910EC 0x522A10EC 0x524910EC 0x528610EC 0x528710EC 0x528910EC 0x525A10EC</string>
 			<key>IOClass</key>
 			<string>rtsx_softc</string>
 			<key>CFBundleIdentifier</key>
