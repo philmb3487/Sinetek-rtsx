@@ -126,6 +126,32 @@ void rtsx_softc::rtsx_pci_detach()
 	intr_source_->release();
 }
 
+
+IOReturn rtsx_softc::setPowerState(unsigned long powerStateOrdinal, IOService *policyMaker)
+{
+    IOReturn ret = IOPMAckImplied;
+    
+    IOLog("%s::setPowerState() ===>\n", __func__);
+    
+    if (powerStateOrdinal)
+    {
+        IOLog("%s::setPowerState: Wake from sleep\n", __func__);
+        rtsx_activate(this, 1);
+        goto done;
+    }
+    else
+    {
+        IOLog("%s::setPowerState: Sleep the card\n", __func__);
+        rtsx_activate(this, 0);
+        goto done;
+    }
+
+done:
+    IOLog("%s::setPowerState() <===\n", __func__);
+    
+    return ret;
+}
+
 void rtsx_softc::prepare_task_loop()
 {
 	task_loop_ = IOWorkLoop::workLoop();

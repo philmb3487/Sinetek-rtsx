@@ -26,6 +26,8 @@ public:
     
 	void rtsx_pci_attach();
 	void rtsx_pci_detach();
+    /* syscl - Power Management Support */
+    virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService * policyMaker) override;
 	
 	void blk_attach();
 	void blk_detach();

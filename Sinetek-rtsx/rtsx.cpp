@@ -29,6 +29,7 @@
 #include "rtsxvar.h"
 #include "sdmmcvar.h"
 #include "sdmmc_ioreg.h"
+#include "device.h"
 
 /*
  * We use two DMA buffers, a command buffer and a data buffer.
@@ -338,34 +339,35 @@ rtsx_init(struct rtsx_softc *sc, int attaching)
 	return (0);
 }
 
-//int
-//rtsx_activate(struct device *self, int act)
-//{
-//	struct rtsx_softc *sc = (struct rtsx_softc *)self;
-//	int rv = 0;
-//	
-//	switch (act) {
-//		case DVACT_SUSPEND:
-//			rv = config_activate_children(self, act);
-//			rtsx_save_regs(sc);
-//			break;
-//		case DVACT_RESUME:
-//			rtsx_restore_regs(sc);
-//			
-//			/* Handle cards ejected/inserted during suspend. */
-//			if (READ4(sc, RTSX_BIPR) & RTSX_SD_EXIST)
-//				rtsx_card_insert(sc);
-//			else
-//				rtsx_card_eject(sc);
-//			
-//			rv = config_activate_children(self, act);
-//			break;
-//		default:
-//			rv = config_activate_children(self, act);
-//			break;
-//	}
-//	return (rv);
-//}
+// syscl - implemented rtsx_activate
+int
+rtsx_activate(struct rtsx_softc *self, int act)
+{
+    struct rtsx_softc *sc = (struct rtsx_softc *)self;
+    int ret = 0;
+    
+    switch (act) {
+        case DVACT_SUSPEND:
+            ret = rtsx_activate(self, act);
+            rtsx_save_regs(sc);
+            break;
+        case DVACT_RESUME:
+            rtsx_restore_regs(sc);
+            
+            /* Handle cards ejected/inserted during suspend. */
+            if (READ4(sc, RTSX_BIPR) & RTSX_SD_EXIST)
+                rtsx_card_insert(sc);
+            else
+                rtsx_card_eject(sc);
+            
+            ret = rtsx_activate(self, act);
+            break;
+        default:
+            ret = rtsx_activate(self, act);
+            break;
+    }
+    return ret;
+}
 
 int
 rtsx_led_enable(struct rtsx_softc *sc)

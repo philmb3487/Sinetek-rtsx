@@ -35,7 +35,8 @@ void splx(int);
 
 /* Host controller functions called by the attachment driver. */
 int	rtsx_attach(struct rtsx_softc *);
-//int	rtsx_activate(struct device *, int);
+/* syscl - enable Power Management function */
+int rtsx_activate(struct rtsx_softc *self, int act);
 int	rtsx_intr(void *);
 
 /* flag values */
