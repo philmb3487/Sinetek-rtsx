@@ -81,20 +81,29 @@ sdmmc_attach(struct sdmmc_softc *sc)
 		printf(", mmc high-speed");
 	if (ISSET(sc->sc_caps, SMC_CAPS_DMA))
 		printf(", dma");
-	printf("\n");
 	
 	if (ISSET(sc->sc_caps, SMC_CAPS_DMA)) {
+        printf("%s: sc-scaps if ===>\n", __func__);
 		error = ENOTSUP;
 		if (error) {
 			printf("%s: can't create DMA map\n", DEVNAME(sc));
 			return;
 		}
+        printf("%s: sc-scaps if <===\n", __func__);
 	}
 	
+    printf("%s: STAILQ_INIT ===>\n", __func__);
 	STAILQ_INIT(&sc->sf_head);
+    printf("%s: STAILQ_INIT <===\n", __func__);
+    printf("%s: TAILQ_INIT: tskq ===>\n", __func__);
 	TAILQ_INIT(&sc->sc_tskq);
+    printf("%s: TAILQ_INIT: tskq <===\n", __func__);
+    printf("%s: TAILQ_INIT: sc_intrq ===>\n", __func__);
 	TAILQ_INIT(&sc->sc_intrq);
+    printf("%s: TAILQ_INIT: sc_intrq <===\n", __func__);
+    printf("%s: sdmmc_init_task ===>\n", __func__);
 	sdmmc_init_task(&sc->sc_discover_task, sdmmc_discover_task, sc);
+    printf("%s: sdmmc_init_task <===\n", __func__);
 	
 #ifdef SDMMC_IOCTL
 	if (bio_register(self, sdmmc_ioctl) != 0)
@@ -106,7 +115,10 @@ sdmmc_attach(struct sdmmc_softc *sc)
 	 * and perform other lengthy operations.  Enter config_pending
 	 * state until the discovery task has run for the first time.
 	 */
+    printf("%s: sc->flags ===>\n", __func__);
 	SET(sc->sc_flags, SMF_CONFIG_PENDING);
+    printf("%s: sc_flags <===\n", __func__);
+    printf("sdmmc_attach() <===\n");
 }
 
 int
@@ -206,7 +218,7 @@ sdmmc_add_task(struct sdmmc_softc *sc, struct sdmmc_task *task)
 	TAILQ_INSERT_TAIL(&sc->sc_tskq, task, next);
 	task->onqueue = 1;
 	task->sc = sc;
-//	wakeup(&sc->sc_tskq);
+	wakeup(&sc->sc_tskq);
 	sc->task_execute_one_->setTimeoutTicks(100 / 5);
 	splx(s);
 }

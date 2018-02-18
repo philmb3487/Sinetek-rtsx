@@ -215,6 +215,7 @@ void sdmmc_needs_discover(struct device *self);
 int
 rtsx_attach(struct rtsx_softc *sc)
 {
+    printf("%s() ===>\n", __func__);
 	u_int32_t sdio_cfg;
 	
 	if (rtsx_init(sc, 1))
@@ -236,9 +237,12 @@ rtsx_attach(struct rtsx_softc *sc)
 	sdmmc_attach(sc);
 	
 	/* Now handle cards discovered during attachment. */
+    printf("%s() sc->flags, RTSX_F_CARD_PRESENT ===>\n", __func__);
 	if (ISSET(sc->flags, RTSX_F_CARD_PRESENT))
 		rtsx_card_insert(sc);
+    printf("%s() sc->flags, RTSX_F_CARD_PRESENT <===\n", __func__);
 	
+    printf("%s() <===\n", __func__);
 	return 0;
 }
 
@@ -1327,13 +1331,19 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 void
 rtsx_card_insert(struct rtsx_softc *sc)
 {
+    printf("%s()  ===>\n", __func__);
 	DPRINTF(1, ("%s: card inserted\n", DEVNAME(sc)));
 	
 	sc->flags |= RTSX_F_CARD_PRESENT;
+    //printf("%s() rtsx_led_enable ===>\n", __func__);
 	(void)rtsx_led_enable(sc);
+    //printf("%s() rtsx_led_enable <===\n", __func__);
 	
 	/* Schedule card discovery task. */
+    //printf("%s() sdmmc_needs_discover ===>\n", __func__);
 	sdmmc_needs_discover((struct device *)sc);
+    //printf("%s() sdmmc_needs_discover <===\n", __func__);
+    //printf("%s()  <===\n", __func__);
 }
 
 void
