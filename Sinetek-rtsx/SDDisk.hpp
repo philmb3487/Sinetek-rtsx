@@ -28,6 +28,7 @@ public:
 	
 	virtual IOReturn	doEjectMedia(void) override;
 	virtual IOReturn	doFormatMedia(UInt64 byteCapacity) override;
+    virtual UInt32      GetBlockCount(void) const;
 	virtual UInt32		doGetFormatCapacities(UInt64 * capacities, UInt32 capacitiesMaxCount) const override;
 	virtual IOReturn	doLockUnlockMedia(bool doLock) override;
 	virtual IOReturn	doSynchronizeCache(void) override;

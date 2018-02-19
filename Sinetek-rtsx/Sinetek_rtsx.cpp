@@ -74,7 +74,7 @@ static void trampoline_intr(OSObject *ih, IOInterruptEventSource *, int count)
 
 void rtsx_softc::rtsx_pci_attach()
 {
-	uint device_id;
+	//uint device_id;
 	uint32_t flags;
     int bar = RTSX_PCI_BAR;
 	
@@ -110,8 +110,8 @@ void rtsx_softc::rtsx_pci_attach()
     intr_source_->enable();
     
     /* Get the vendor and try to match on it. */
-    device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
-    switch (device_id) {
+    //device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
+    switch (provider_->extendedConfigRead16(kIOPCIConfigDeviceID)) {
         case PCI_PRODUCT_REALTEK_RTS5209:
             flags = RTSX_F_5209;
             break;

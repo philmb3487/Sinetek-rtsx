@@ -64,6 +64,11 @@ IOReturn SDDisk::doFormatMedia(UInt64 byteCapacity)
 	return kIOReturnSuccess;
 }
 
+UInt32 SDDisk::GetBlockCount() const
+{
+    return num_blocks_;
+}
+
 UInt32 SDDisk::doGetFormatCapacities(UInt64* capacities, UInt32 capacitiesMaxCount) const
 {
 	// Ensure that the array is sufficient to hold all our formats (we require 1 element).
@@ -74,7 +79,7 @@ UInt32 SDDisk::doGetFormatCapacities(UInt64* capacities, UInt32 capacitiesMaxCou
 	 * We need to run circles around the const-ness of this function.
 	 */
 //	auto blockCount = const_cast<SDDisk *>(this)->getBlockCount();
-	auto blockCount = 10000;
+    auto blockCount = GetBlockCount();
 	
 	// The caller may provide a NULL array if it wishes to query the number of formats that we support.
 	if (capacities != NULL)
@@ -96,14 +101,14 @@ char* SDDisk::getVendorString(void)
 {
     // syscl - safely converted to char * use const_static due
     // to ISO C++11 does not allow conversion from string literal to 'char *'
-	return const_cast<char *>("Realtek");
+    return const_cast<char *>("Realtek");
 }
 
 char* SDDisk::getProductString(void)
 {
     // syscl - safely converted to char * use const_static due
     // to ISO C++11 does not allow conversion from string literal to 'char *'
-	return const_cast<char *>("SD Card Reader");
+    return const_cast<char *>("SD Card Reader");
 }
 
 char* SDDisk::getRevisionString(void)
@@ -117,7 +122,7 @@ char* SDDisk::getAdditionalDeviceInfoString(void)
 {
     // syscl - safely converted to char * use const_static due
     // to ISO C++11 does not allow conversion from string literal to 'char *''
-	return const_cast<char *>("1.0");
+    return const_cast<char *>("1.0");
 }
 
 IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
@@ -128,8 +133,8 @@ IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
 
 IOReturn SDDisk::reportEjectability(bool *isEjectable)
 {
-	*isEjectable = true; // syscl - should be true
-	return kIOReturnSuccess;
+    *isEjectable = true; // syscl - should be true
+    return kIOReturnSuccess;
 }
 
 /* syscl - deprecated
@@ -228,17 +233,15 @@ void read_task_impl_(void *_args)
 	auto map = args->buffer->map();
 	u_char * buf = (u_char *) map->getVirtualAddress();
 	
-#if 0
 	for (int b = 0; b < 30; ++b)
 	{
-//		sdmmc_mem_single_read_block(args->that->provider_->sc_fn0,
-//						    0, buf + b * 512, 512);
+		sdmmc_mem_single_read_block(args->that->provider_->sc_fn0,
+						    0, buf + b * 512, 512);
 		sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
 					  0, buf, 512);
-//		sdmmc_go_idle_state(args->that->provider_);
+		sdmmc_go_idle_state(args->that->provider_);
 
 	}
-#endif
 	
 	for (int b = 0; b < args->nblks;)
 	{
