@@ -5,6 +5,7 @@
 #include "SDDisk.hpp"
 #include "Sinetek_rtsx.hpp"
 #include "sdmmcvar.h"
+#include "device.h"
 
 // Define the superclass
 #define super IOBlockStorageDevice
@@ -50,10 +51,11 @@ void SDDisk::detach(IOService* provider)
 
 IOReturn SDDisk::doEjectMedia(void)
 {
-	IOLog("RAMDISK: doEjectMedia\n");
+    IOLog("%s: RAMDISK: doEjectMedia.", __func__);
 	
 	// XXX signal intent further down the stack?
-	
+    // syscl - implement eject routine here
+    rtsx_card_eject(provider_);
 	return kIOReturnSuccess;
 }
 

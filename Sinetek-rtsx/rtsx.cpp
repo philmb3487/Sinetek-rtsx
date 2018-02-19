@@ -364,10 +364,10 @@ rtsx_activate(struct rtsx_softc *self, int act)
             else
                 rtsx_card_eject(sc);
             
-            ret = rtsx_activate(self, act);
+            ret = rtsx_activate(sc, act);
             break;
         default:
-            ret = rtsx_activate(self, act);
+            ret = rtsx_activate(sc, act);
             break;
     }
     return ret;

@@ -18,5 +18,7 @@
 #define    DVACT_RESUME        4    /* resume the device */
 #define    DVACT_WAKEUP        5    /* tell device to recover after resume */
 #define    DVACT_POWERDOWN        6    /* power device down */
+// syscl - for card ejection
+extern void    rtsx_card_eject(struct rtsx_softc *);
 
 #endif /* device_h */

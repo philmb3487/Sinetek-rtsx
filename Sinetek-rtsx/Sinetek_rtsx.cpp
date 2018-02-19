@@ -89,7 +89,6 @@ void rtsx_softc::rtsx_pci_attach()
     
     /* syscl - Power up the device */
     PMinit();
-    
     if (registerPowerDriver(this, ourPowerStates, kPowerStateCount) != IOPMNoErr)
     {
         IOLog("%s: could not register state.", __func__);
