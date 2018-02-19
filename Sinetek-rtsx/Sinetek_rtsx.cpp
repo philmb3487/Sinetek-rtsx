@@ -12,6 +12,26 @@ OSDefineMetaClassAndStructors(rtsx_softc, super);
 #include "rtsxvar.h"
 #include "SDDisk.hpp"
 
+//
+// syscl - define & enumerate power states
+//
+enum
+{
+    kPowerStateSleep    = 0,
+    kPowerStateDoze     = 1,
+    kPowerStateNormal   = 2,
+    kPowerStateCount
+};
+//
+// syscl - Define usable power states
+//
+static IOPMPowerState ourPowerStates[kPowerStateCount] =
+{
+    { 1,0,0,0,0,0,0,0,0,0,0,0 },
+    { 1,kIOPMDeviceUsable,kIOPMDoze,kIOPMDoze,0,0,0,0,0,0,0,0 },
+    { 1,kIOPMDeviceUsable,IOPMPowerOn,IOPMPowerOn,0,0,0,0,0,0,0,0 }
+};
+
 bool rtsx_softc::start(IOService *provider)
 {
 	if (!super::start(provider))
@@ -63,18 +83,17 @@ void rtsx_softc::rtsx_pci_attach()
 		printf("no asic\n");
 		return;
 	}
-	
-	/* Enable the device */
-	provider_->setBusMasterEnable(true);
-	
-	/* Power up the device */
-	if (this->requestPowerDomainState(kIOPMPowerOn,
-					  (IOPowerConnection *) this->getParentEntry(gIOPowerPlane),
-					  IOPMLowestState) != IOPMNoErr)
-	{
-		printf("pci_set_powerstate_D0: domain D0 not received.\n");
-		return;
-	}
+    
+    /* Enable the device */
+    provider_->setBusMasterEnable(true);
+    
+    /* syscl - Power up the device */
+    PMinit();
+    
+    if (registerPowerDriver(this, ourPowerStates, kPowerStateCount) != IOPMNoErr)
+    {
+        IOLog("%s: could not register state.", __func__);
+    }
     
     /* Map device memory with register. */
     map_ = provider_->mapDeviceMemoryWithRegister(bar);

@@ -1299,11 +1299,11 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 {
 	int status;
 	int error = 0;
-	int s;
+	//int s;
 	
 	mask |= RTSX_TRANS_FAIL_INT;
 	
-	s = splsdmmc();
+	status = splsdmmc();
 	status = sc->intr_status & mask;
 	while (status == 0) {
 		if (tsleep(&sc->intr_status, PRIBIO, "rtsxintr", timo)
@@ -1320,7 +1320,7 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 	if (!ISSET(sc->flags, RTSX_F_CARD_PRESENT))
 		error = ENODEV;
 	
-	splx(s);
+	splx(status);
 	
 	if (error == 0 && (status & RTSX_TRANS_FAIL_INT))
 		error = EIO;
