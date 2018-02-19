@@ -5,7 +5,7 @@
 #include <IOKit/IOTimerEventSource.h>
 
 #undef super
-#define super IOPCIDevice
+#define super IOService
 OSDefineMetaClassAndStructors(rtsx_softc, super);
 
 #include "rtsxreg.h"
@@ -63,16 +63,6 @@ void rtsx_softc::rtsx_pci_attach()
 		printf("no asic\n");
 		return;
 	}
-    
-    /* Map device interrupt. */
-    intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
-    if (!intr_source_)
-    {
-        printf("can't map interrupt source\n");
-        return;
-    }
-    workloop_->addEventSource(intr_source_);
-    intr_source_->enable();
 	
 	/* Enable the device */
 	provider_->setBusMasterEnable(true);
@@ -85,6 +75,21 @@ void rtsx_softc::rtsx_pci_attach()
 		printf("pci_set_powerstate_D0: domain D0 not received.\n");
 		return;
 	}
+    
+    /* Map device memory with register. */
+    map_ = provider_->mapDeviceMemoryWithRegister(bar);
+    if (!map_) return;
+    memory_descriptor_ = map_->getMemoryDescriptor();
+    
+    /* Map device interrupt. */
+    intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
+    if (!intr_source_)
+    {
+        printf("can't map interrupt source\n");
+        return;
+    }
+    workloop_->addEventSource(intr_source_);
+    intr_source_->enable();
     
     /* Get the vendor and try to match on it. */
     device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
@@ -105,11 +110,6 @@ void rtsx_softc::rtsx_pci_attach()
             flags = 0;
             break;
     }
-	
-	/* Map device memory with register. */
-	map_ = provider_->mapDeviceMemoryWithRegister(bar);
-	if (!map_) return;
-	memory_descriptor_ = map_->getMemoryDescriptor();
 	
 	int error = rtsx_attach(this);
 	if (!error)

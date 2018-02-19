@@ -14,7 +14,7 @@
 #define RTSX_NREG ((0XFDAE - 0XFDA0) + (0xFD69 - 0xFD32) + (0xFE34 - 0xFE20))
 
 class SDDisk;
-struct rtsx_softc : public IOPCIDevice
+struct rtsx_softc : public IOService
 {
 
 	OSDeclareDefaultStructors(rtsx_softc);
