@@ -37,7 +37,7 @@ public:
 	virtual char*		getAdditionalDeviceInfoString(void) override;
 	virtual IOReturn	reportBlockSize(UInt64 *blockSize) override;
 	virtual IOReturn	reportEjectability(bool *isEjectable) override;
-	virtual IOReturn	reportLockability(bool *isLockable) override;
+	//virtual IOReturn	reportLockability(bool *isLockable) override;
 	virtual IOReturn	reportMaxValidBlock(UInt64 *maxBlock) override;
 	virtual IOReturn	reportMediaState(bool *mediaPresent,bool *changedState) override;
 	virtual IOReturn	reportPollRequirements(bool *pollRequired, bool *pollIsExpensive) override;

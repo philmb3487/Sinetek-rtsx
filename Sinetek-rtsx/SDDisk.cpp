@@ -94,26 +94,30 @@ IOReturn SDDisk::doSynchronizeCache(void)
 
 char* SDDisk::getVendorString(void)
 {
-	return NULL;
-	return (char*)"kext_rtsx";
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+	return const_cast<char *>("Realtek");
 }
 
 char* SDDisk::getProductString(void)
 {
-	return (char*)"RTSX SD Card Reader Media";
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+	return const_cast<char *>("SD Card Reader");
 }
 
 char* SDDisk::getRevisionString(void)
 {
-	static char *revision = "1.0 : " __DATE__ ":" __TIME__;
-	
-	return (char*)revision; // XXX ???
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+    return const_cast<char *>("1.0");
 }
 
 char* SDDisk::getAdditionalDeviceInfoString(void)
 {
-	// Does not seem to be used. ???
-	return nullptr;
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *''
+	return const_cast<char *>("1.0");
 }
 
 IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
@@ -124,15 +128,16 @@ IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
 
 IOReturn SDDisk::reportEjectability(bool *isEjectable)
 {
-	*isEjectable = false; // XXX fix
+	*isEjectable = true; // syscl - should be true
 	return kIOReturnSuccess;
 }
 
+/* syscl - deprecated
 IOReturn SDDisk::reportLockability(bool *isLockable)
 {
 	*isLockable = false;
 	return kIOReturnSuccess;
-}
+}*/
 
 IOReturn SDDisk::reportMaxValidBlock(UInt64 *maxBlock)
 {
