@@ -233,31 +233,27 @@ void read_task_impl_(void *_args)
 	auto map = args->buffer->map();
 	u_char * buf = (u_char *) map->getVirtualAddress();
 	
-	for (int b = 0; b < 30; ++b)
+	for (UInt64 b = 0; b < args->nblks; ++b)
 	{
 		sdmmc_mem_single_read_block(args->that->provider_->sc_fn0,
 						    0, buf + b * 512, 512);
 		sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
 					  0, buf, 512);
 		sdmmc_go_idle_state(args->that->provider_);
-
 	}
 	
-	for (int b = 0; b < args->nblks;)
+	for (UInt64 b = 0; b < args->nblks; ++b)
 	{
 		printf("would: %lld  last block %d\n", args->block + b, args->that->num_blocks_ - 1);
-		unsigned int would = args->block + b;
-		if ( would > 60751872 ) would = 60751871;
-		
-		
+		//unsigned int would = args->block + b;
+        auto would = args->block + b;
+		//if ( would > 60751872 ) would = 60751871;
 		error = sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
-				would, buf + b * 512, 512);
+				static_cast<int>(would), buf + b * 512, 512);
 		if (error) {
 			(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
 			goto out;
 		}
-		
-		b += 1;
 	}
 	
 	(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnSuccess, actualByteCount);
@@ -290,7 +286,7 @@ IOReturn SDDisk::doAsyncReadWrite(IOMemoryDescriptor *buffer,
 	IODirection		direction;
 	
 	// Return errors for incoming I/O if we have been terminated
-	if (isInactive() != false )
+	if (isInactive() != false)
 		return kIOReturnNotAttached;
 	
 	direction = buffer->getDirection();
