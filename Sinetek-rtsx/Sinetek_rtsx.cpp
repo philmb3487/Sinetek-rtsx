@@ -74,8 +74,8 @@ static void trampoline_intr(OSObject *ih, IOInterruptEventSource *, int count)
 
 void rtsx_softc::rtsx_pci_attach()
 {
-	//uint device_id;
-	uint32_t flags;
+	uint device_id;
+	//uint32_t flags;
     int bar = RTSX_PCI_BAR;
 	
 	if ((provider_->extendedConfigRead16(RTSX_CFG_PCI) & RTSX_CFG_ASIC) != 0)
@@ -91,10 +91,13 @@ void rtsx_softc::rtsx_pci_attach()
     PMinit();
     if (registerPowerDriver(this, ourPowerStates, kPowerStateCount) != IOPMNoErr)
     {
-        IOLog("%s: could not register state.", __func__);
+        IOLog("%s: could not register state.\n", __func__);
     }
     
     /* Map device memory with register. */
+	device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
+	if (device_id == PCI_PRODUCT_REALTEK_RTS525A) 
+		bar = RTSX_PCI_BAR_525A;
     map_ = provider_->mapDeviceMemoryWithRegister(bar);
     if (!map_) return;
     memory_descriptor_ = map_->getMemoryDescriptor();
@@ -111,7 +114,7 @@ void rtsx_softc::rtsx_pci_attach()
     
     /* Get the vendor and try to match on it. */
     //device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
-    switch (provider_->extendedConfigRead16(kIOPCIConfigDeviceID)) {
+    switch (device_id) {
         case PCI_PRODUCT_REALTEK_RTS5209:
             flags = RTSX_F_5209;
             break;
