@@ -5,12 +5,32 @@
 #include <IOKit/IOTimerEventSource.h>
 
 #undef super
-#define super IOPCIDevice
+#define super IOService
 OSDefineMetaClassAndStructors(rtsx_softc, super);
 
 #include "rtsxreg.h"
 #include "rtsxvar.h"
 #include "SDDisk.hpp"
+
+//
+// syscl - define & enumerate power states
+//
+enum
+{
+    kPowerStateSleep    = 0,
+    kPowerStateDoze     = 1,
+    kPowerStateNormal   = 2,
+    kPowerStateCount
+};
+//
+// syscl - Define usable power states
+//
+static IOPMPowerState ourPowerStates[kPowerStateCount] =
+{
+    { 1,0,0,0,0,0,0,0,0,0,0,0 },
+    { 1,kIOPMDeviceUsable,kIOPMDoze,kIOPMDoze,0,0,0,0,0,0,0,0 },
+    { 1,kIOPMDeviceUsable,IOPMPowerOn,IOPMPowerOn,0,0,0,0,0,0,0,0 }
+};
 
 bool rtsx_softc::start(IOService *provider)
 {
@@ -55,55 +75,62 @@ static void trampoline_intr(OSObject *ih, IOInterruptEventSource *, int count)
 void rtsx_softc::rtsx_pci_attach()
 {
 	uint device_id;
-	uint32_t flags;
+	//uint32_t flags;
+    int bar = RTSX_PCI_BAR;
 	
 	if ((provider_->extendedConfigRead16(RTSX_CFG_PCI) & RTSX_CFG_ASIC) != 0)
 	{
 		printf("no asic\n");
 		return;
 	}
-	
-	/* Enable the device */
-	provider_->setBusMasterEnable(true);
-	
-	/* Power up the device */
-	if (this->requestPowerDomainState(kIOPMPowerOn,
-					  (IOPowerConnection *) this->getParentEntry(gIOPowerPlane),
-					  IOPMLowestState) != IOPMNoErr)
-	{
-		printf("pci_set_powerstate_D0: domain D0 not received.\n");
-		return;
-	}
-	
-	/* Map device memory. */
-	map_ = provider_->mapDeviceMemoryWithRegister(RTSX_PCI_BAR);
-	if (!map_) return;
-	memory_descriptor_ = map_->getMemoryDescriptor();
-	
-	/* Map device interrupt. */
-	intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
-	if (!intr_source_) return;
-	workloop_->addEventSource(intr_source_);
-	intr_source_->enable();
-	
-	/* Get the vendor and try to match on it. */
+    
+    /* Enable the device */
+    provider_->setBusMasterEnable(true);
+    
+    /* syscl - Power up the device */
+    PMinit();
+    if (registerPowerDriver(this, ourPowerStates, kPowerStateCount) != IOPMNoErr)
+    {
+        IOLog("%s: could not register state.\n", __func__);
+    }
+    
+    /* Map device memory with register. */
 	device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
-	switch (device_id) {
-		case PCI_PRODUCT_REALTEK_RTS5209:
-			flags = RTSX_F_5209;
-			break;
-		case PCI_PRODUCT_REALTEK_RTS5229:
-		case PCI_PRODUCT_REALTEK_RTS5249:
-			flags = RTSX_F_5229;
-			break;
-		case PCI_PRODUCT_REALTEK_RTS525A:
-			/* syscl - RTS525A */
-			flags = RTSX_F_525A;
-			break;
-		default:
-			flags = 0;
-			break;
-	}
+	if (device_id == PCI_PRODUCT_REALTEK_RTS525A) 
+		bar = RTSX_PCI_BAR_525A;
+    map_ = provider_->mapDeviceMemoryWithRegister(bar);
+    if (!map_) return;
+    memory_descriptor_ = map_->getMemoryDescriptor();
+    
+    /* Map device interrupt. */
+    intr_source_ = IOInterruptEventSource::interruptEventSource(this, trampoline_intr, provider_);
+    if (!intr_source_)
+    {
+        printf("can't map interrupt source\n");
+        return;
+    }
+    workloop_->addEventSource(intr_source_);
+    intr_source_->enable();
+    
+    /* Get the vendor and try to match on it. */
+    //device_id = provider_->extendedConfigRead16(kIOPCIConfigDeviceID);
+    switch (device_id) {
+        case PCI_PRODUCT_REALTEK_RTS5209:
+            flags = RTSX_F_5209;
+            break;
+        case PCI_PRODUCT_REALTEK_RTS5229:
+        case PCI_PRODUCT_REALTEK_RTS5249:
+            flags = RTSX_F_5229;
+            break;
+        case PCI_PRODUCT_REALTEK_RTS525A:
+            /* syscl - RTS525A */
+            flags = RTSX_F_525A;
+            bar = RTSX_PCI_BAR_525A;
+            break;
+        default:
+            flags = 0;
+            break;
+    }
 	
 	int error = rtsx_attach(this);
 	if (!error)
@@ -118,6 +145,32 @@ void rtsx_softc::rtsx_pci_detach()
 	
 	workloop_->removeEventSource(intr_source_);
 	intr_source_->release();
+}
+
+
+IOReturn rtsx_softc::setPowerState(unsigned long powerStateOrdinal, IOService *policyMaker)
+{
+    IOReturn ret = IOPMAckImplied;
+    
+    IOLog("%s::setPowerState() ===>\n", __func__);
+    
+    if (powerStateOrdinal)
+    {
+        IOLog("%s::setPowerState: Wake from sleep\n", __func__);
+        rtsx_activate(this, 1);
+        goto done;
+    }
+    else
+    {
+        IOLog("%s::setPowerState: Sleep the card\n", __func__);
+        rtsx_activate(this, 0);
+        goto done;
+    }
+
+done:
+    IOLog("%s::setPowerState() <===\n", __func__);
+    
+    return ret;
 }
 
 void rtsx_softc::prepare_task_loop()

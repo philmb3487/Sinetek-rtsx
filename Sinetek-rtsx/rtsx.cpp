@@ -29,6 +29,7 @@
 #include "rtsxvar.h"
 #include "sdmmcvar.h"
 #include "sdmmc_ioreg.h"
+#include "device.h"
 
 /*
  * We use two DMA buffers, a command buffer and a data buffer.
@@ -214,6 +215,7 @@ void sdmmc_needs_discover(struct device *self);
 int
 rtsx_attach(struct rtsx_softc *sc)
 {
+    printf("%s() ===>\n", __func__);
 	u_int32_t sdio_cfg;
 	
 	if (rtsx_init(sc, 1))
@@ -235,9 +237,12 @@ rtsx_attach(struct rtsx_softc *sc)
 	sdmmc_attach(sc);
 	
 	/* Now handle cards discovered during attachment. */
+    printf("%s() sc->flags, RTSX_F_CARD_PRESENT ===>\n", __func__);
 	if (ISSET(sc->flags, RTSX_F_CARD_PRESENT))
 		rtsx_card_insert(sc);
+    printf("%s() sc->flags, RTSX_F_CARD_PRESENT <===\n", __func__);
 	
+    printf("%s() <===\n", __func__);
 	return 0;
 }
 
@@ -338,34 +343,35 @@ rtsx_init(struct rtsx_softc *sc, int attaching)
 	return (0);
 }
 
-//int
-//rtsx_activate(struct device *self, int act)
-//{
-//	struct rtsx_softc *sc = (struct rtsx_softc *)self;
-//	int rv = 0;
-//	
-//	switch (act) {
-//		case DVACT_SUSPEND:
-//			rv = config_activate_children(self, act);
-//			rtsx_save_regs(sc);
-//			break;
-//		case DVACT_RESUME:
-//			rtsx_restore_regs(sc);
-//			
-//			/* Handle cards ejected/inserted during suspend. */
-//			if (READ4(sc, RTSX_BIPR) & RTSX_SD_EXIST)
-//				rtsx_card_insert(sc);
-//			else
-//				rtsx_card_eject(sc);
-//			
-//			rv = config_activate_children(self, act);
-//			break;
-//		default:
-//			rv = config_activate_children(self, act);
-//			break;
-//	}
-//	return (rv);
-//}
+// syscl - implemented rtsx_activate
+int
+rtsx_activate(struct rtsx_softc *self, int act)
+{
+    struct rtsx_softc *sc = (struct rtsx_softc *)self;
+    int ret = 0;
+    
+    switch (act) {
+        case DVACT_SUSPEND:
+            ret = rtsx_activate(self, act);
+            rtsx_save_regs(sc);
+            break;
+        case DVACT_RESUME:
+            rtsx_restore_regs(sc);
+            
+            /* Handle cards ejected/inserted during suspend. */
+            if (READ4(sc, RTSX_BIPR) & RTSX_SD_EXIST)
+                rtsx_card_insert(sc);
+            else
+                rtsx_card_eject(sc);
+            
+            ret = rtsx_activate(sc, act);
+            break;
+        default:
+            ret = rtsx_activate(sc, act);
+            break;
+    }
+    return ret;
+}
 
 int
 rtsx_led_enable(struct rtsx_softc *sc)
@@ -491,6 +497,11 @@ rtsx_bus_power_on(struct rtsx_softc *sc)
 {
 	u_int8_t enable3;
 	
+    /* syscl - added RTS525A support here */
+    if (sc->flags & RTSX_F_525A)
+        rtsx_write(sc, RTSX_LDO_VCC_CFG1, RTSX_LDO_VCC_TUNE_MASK,
+                   RTSX_LDO_VCC_3V3);
+    
 	/* Select SD card. */
 	RTSX_WRITE(sc, RTSX_CARD_SELECT, RTSX_SD_MOD_SEL);
 	RTSX_WRITE(sc, RTSX_CARD_SHARE_MODE, RTSX_CARD_SHARE_48_SD);
@@ -1084,7 +1095,7 @@ rtsx_xfer(struct rtsx_softc *sc, struct sdmmc_command *cmd, u_int32_t *cmdbuf)
 	datakvap = (caddr_t)data_buffer->getBytesNoCopy();
 	physAddr = data_buffer->getPhysicalSegment(0, &physSize);
 	if (physSize == 0)
-		goto ret;
+		goto free_databuf;
 	
 	/* If this is a write, copy data from sdmmc-provided buffer. */
 	if (!read)
@@ -1288,11 +1299,11 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 {
 	int status;
 	int error = 0;
-	int s;
+	//int s;
 	
 	mask |= RTSX_TRANS_FAIL_INT;
 	
-	s = splsdmmc();
+	status = splsdmmc();
 	status = sc->intr_status & mask;
 	while (status == 0) {
 		if (tsleep(&sc->intr_status, PRIBIO, "rtsxintr", timo)
@@ -1309,7 +1320,7 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 	if (!ISSET(sc->flags, RTSX_F_CARD_PRESENT))
 		error = ENODEV;
 	
-	splx(s);
+	splx(status);
 	
 	if (error == 0 && (status & RTSX_TRANS_FAIL_INT))
 		error = EIO;
@@ -1320,13 +1331,19 @@ rtsx_wait_intr(struct rtsx_softc *sc, int mask, int timo)
 void
 rtsx_card_insert(struct rtsx_softc *sc)
 {
+    printf("%s()  ===>\n", __func__);
 	DPRINTF(1, ("%s: card inserted\n", DEVNAME(sc)));
 	
 	sc->flags |= RTSX_F_CARD_PRESENT;
+    //printf("%s() rtsx_led_enable ===>\n", __func__);
 	(void)rtsx_led_enable(sc);
+    //printf("%s() rtsx_led_enable <===\n", __func__);
 	
 	/* Schedule card discovery task. */
+    //printf("%s() sdmmc_needs_discover ===>\n", __func__);
 	sdmmc_needs_discover((struct device *)sc);
+    //printf("%s() sdmmc_needs_discover <===\n", __func__);
+    //printf("%s()  <===\n", __func__);
 }
 
 void

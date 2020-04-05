@@ -28,6 +28,7 @@ public:
 	
 	virtual IOReturn	doEjectMedia(void) override;
 	virtual IOReturn	doFormatMedia(UInt64 byteCapacity) override;
+    virtual UInt32      GetBlockCount(void) const;
 	virtual UInt32		doGetFormatCapacities(UInt64 * capacities, UInt32 capacitiesMaxCount) const override;
 	virtual IOReturn	doLockUnlockMedia(bool doLock) override;
 	virtual IOReturn	doSynchronizeCache(void) override;
@@ -37,7 +38,7 @@ public:
 	virtual char*		getAdditionalDeviceInfoString(void) override;
 	virtual IOReturn	reportBlockSize(UInt64 *blockSize) override;
 	virtual IOReturn	reportEjectability(bool *isEjectable) override;
-	virtual IOReturn	reportLockability(bool *isLockable) override;
+	//virtual IOReturn	reportLockability(bool *isLockable) override;
 	virtual IOReturn	reportMaxValidBlock(UInt64 *maxBlock) override;
 	virtual IOReturn	reportMediaState(bool *mediaPresent,bool *changedState) override;
 	virtual IOReturn	reportPollRequirements(bool *pollRequired, bool *pollIsExpensive) override;

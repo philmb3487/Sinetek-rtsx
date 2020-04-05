@@ -5,6 +5,7 @@
 #include "SDDisk.hpp"
 #include "Sinetek_rtsx.hpp"
 #include "sdmmcvar.h"
+#include "device.h"
 
 // Define the superclass
 #define super IOBlockStorageDevice
@@ -50,16 +51,22 @@ void SDDisk::detach(IOService* provider)
 
 IOReturn SDDisk::doEjectMedia(void)
 {
-	IOLog("RAMDISK: doEjectMedia\n");
+    IOLog("%s: RAMDISK: doEjectMedia.", __func__);
 	
 	// XXX signal intent further down the stack?
-	
+    // syscl - implement eject routine here
+    rtsx_card_eject(provider_);
 	return kIOReturnSuccess;
 }
 
 IOReturn SDDisk::doFormatMedia(UInt64 byteCapacity)
 {
 	return kIOReturnSuccess;
+}
+
+UInt32 SDDisk::GetBlockCount() const
+{
+    return num_blocks_;
 }
 
 UInt32 SDDisk::doGetFormatCapacities(UInt64* capacities, UInt32 capacitiesMaxCount) const
@@ -72,7 +79,7 @@ UInt32 SDDisk::doGetFormatCapacities(UInt64* capacities, UInt32 capacitiesMaxCou
 	 * We need to run circles around the const-ness of this function.
 	 */
 //	auto blockCount = const_cast<SDDisk *>(this)->getBlockCount();
-	auto blockCount = 10000;
+    auto blockCount = GetBlockCount();
 	
 	// The caller may provide a NULL array if it wishes to query the number of formats that we support.
 	if (capacities != NULL)
@@ -92,26 +99,30 @@ IOReturn SDDisk::doSynchronizeCache(void)
 
 char* SDDisk::getVendorString(void)
 {
-	return NULL;
-	return (char*)"kext_rtsx";
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+    return const_cast<char *>("Realtek");
 }
 
 char* SDDisk::getProductString(void)
 {
-	return (char*)"RTSX SD Card Reader Media";
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+    return const_cast<char *>("SD Card Reader");
 }
 
 char* SDDisk::getRevisionString(void)
 {
-	static char *revision = "1.0 : " __DATE__ ":" __TIME__;
-	
-	return (char*)revision; // XXX ???
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *'
+    return const_cast<char *>("1.0");
 }
 
 char* SDDisk::getAdditionalDeviceInfoString(void)
 {
-	// Does not seem to be used. ???
-	return nullptr;
+    // syscl - safely converted to char * use const_static due
+    // to ISO C++11 does not allow conversion from string literal to 'char *''
+    return const_cast<char *>("1.0");
 }
 
 IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
@@ -122,20 +133,20 @@ IOReturn SDDisk::reportBlockSize(UInt64 *blockSize)
 
 IOReturn SDDisk::reportEjectability(bool *isEjectable)
 {
-	*isEjectable = false; // XXX fix
-	return kIOReturnSuccess;
+    *isEjectable = true; // syscl - should be true
+    return kIOReturnSuccess;
 }
 
+/* syscl - deprecated
 IOReturn SDDisk::reportLockability(bool *isLockable)
 {
 	*isLockable = false;
 	return kIOReturnSuccess;
-}
+}*/
 
 IOReturn SDDisk::reportMaxValidBlock(UInt64 *maxBlock)
 {
-//	*maxBlock = num_blocks_ - 1;
-	*maxBlock = num_blocks_ - 1000;
+	*maxBlock = num_blocks_ - 1;
 	return kIOReturnSuccess;
 }
 
@@ -162,7 +173,9 @@ IOReturn SDDisk::reportRemovability(bool *isRemovable)
 
 IOReturn SDDisk::reportWriteProtection(bool *isWriteProtected)
 {
-	*isWriteProtected = true; // XXX
+    if (isWriteProtected && *isWriteProtected) {
+        *isWriteProtected = false;
+    }
 	return kIOReturnSuccess;
 }
 
@@ -207,53 +220,69 @@ sdmmc_mem_read_block_subr(struct sdmmc_function *sf,
 
 void read_task_impl_(void *_args)
 {
-	BioArgs *args = (BioArgs *) _args;
-	IOByteCount actualByteCount;
-	int error = 0;
-	
-	if (!args) return;
-	
-	printf("read_task_impl_  sz %llu\n", args->nblks * args->that->blk_size_);
-	printf("sf->csd.sector_size %d\n", args->that->provider_->sc_fn0->csd.sector_size);
-	
-	
-	actualByteCount = args->nblks * args->that->blk_size_;
-	auto map = args->buffer->map();
-	u_char * buf = (u_char *) map->getVirtualAddress();
-	
-#if 0
-	for (int b = 0; b < 30; ++b)
-	{
-//		sdmmc_mem_single_read_block(args->that->provider_->sc_fn0,
-//						    0, buf + b * 512, 512);
-		sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
-					  0, buf, 512);
-//		sdmmc_go_idle_state(args->that->provider_);
-
-	}
-#endif
-	
-	for (int b = 0; b < args->nblks;)
-	{
-		printf("would: %lld  last block %d\n", args->block + b, args->that->num_blocks_ - 1);
-		unsigned int would = args->block + b;
-		if ( would > 60751872 ) would = 60751871;
-		
-		
-		error = sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
-				would, buf + b * 512, 512);
-		if (error) {
-			(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
-			goto out;
-		}
-		
-		b += 1;
-	}
-	
-	(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnSuccess, actualByteCount);
-	
+    BioArgs *args = (BioArgs *) _args;
+    IOByteCount actualByteCount;
+    int error = 0;
+    
+    printf("read_task_impl_  sz %llu\n", args->nblks * args->that->blk_size_);
+    printf("sf->csd.sector_size %d\n", args->that->provider_->sc_fn0->csd.sector_size);
+    
+    
+    actualByteCount = args->nblks * args->that->blk_size_;
+    IOByteCount maxSendBytes = 128 * 1024;
+    IOByteCount remainingBytes = args->nblks * 512;
+    IOByteCount sentBytes = 0;
+    int blocks = (int) args->block;
+    
+    u_char *buf = new u_char[actualByteCount];
+    
+    while (remainingBytes > 0) {
+        IOByteCount sendByteCount = remainingBytes > maxSendBytes ? maxSendBytes : remainingBytes;
+        
+        if (args->direction == kIODirectionIn) {
+            error = sdmmc_mem_read_block(args->that->provider_->sc_fn0, blocks, buf + sentBytes, sendByteCount);
+        }
+        else {
+            IOByteCount copied_bytes = args->buffer->readBytes(sentBytes, buf, sendByteCount);
+            if (copied_bytes == 0) {
+                delete[] buf;
+                if (args->completion.action) {
+                    (args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
+                }
+                goto out;
+            }
+            error = sdmmc_mem_write_block(args->that->provider_->sc_fn0, blocks, buf + sentBytes, sendByteCount);
+        }
+        
+        if (error) {
+            if (args->completion.action) {
+                (args->completion.action)(args->completion.target, args->completion.parameter,
+                              kIOReturnIOError, 0);
+            }
+            goto out;
+        }
+        
+        IOByteCount copied_bytes = args->buffer->writeBytes(sentBytes, buf, sendByteCount);
+        if (copied_bytes == 0) {
+            delete[] buf;
+            if (args->completion.action) {
+                (args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
+            }
+            goto out;
+        }
+        
+        blocks += (sendByteCount / 512);
+        remainingBytes -= sendByteCount;
+        sentBytes += sendByteCount;
+    }
+    
+    delete[] buf;
+    if (args->completion.action) {
+        (args->completion.action)(args->completion.target, args->completion.parameter,
+                      kIOReturnSuccess, actualByteCount);
+    }
 out:
-	delete args;
+    delete args;
 }
 
 /**
@@ -280,7 +309,7 @@ IOReturn SDDisk::doAsyncReadWrite(IOMemoryDescriptor *buffer,
 	IODirection		direction;
 	
 	// Return errors for incoming I/O if we have been terminated
-	if (isInactive() != false )
+	if (isInactive() != false)
 		return kIOReturnNotAttached;
 	
 	direction = buffer->getDirection();
