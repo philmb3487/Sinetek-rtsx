@@ -146,8 +146,7 @@ IOReturn SDDisk::reportLockability(bool *isLockable)
 
 IOReturn SDDisk::reportMaxValidBlock(UInt64 *maxBlock)
 {
-//	*maxBlock = num_blocks_ - 1;
-	*maxBlock = num_blocks_ - 1000;
+	*maxBlock = num_blocks_ - 1;
 	return kIOReturnSuccess;
 }
 

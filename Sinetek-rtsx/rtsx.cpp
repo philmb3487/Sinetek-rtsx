@@ -1095,7 +1095,7 @@ rtsx_xfer(struct rtsx_softc *sc, struct sdmmc_command *cmd, u_int32_t *cmdbuf)
 	datakvap = (caddr_t)data_buffer->getBytesNoCopy();
 	physAddr = data_buffer->getPhysicalSegment(0, &physSize);
 	if (physSize == 0)
-		goto ret;
+		goto free_databuf;
 	
 	/* If this is a write, copy data from sdmmc-provided buffer. */
 	if (!read)
