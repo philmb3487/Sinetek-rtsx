@@ -173,7 +173,9 @@ IOReturn SDDisk::reportRemovability(bool *isRemovable)
 
 IOReturn SDDisk::reportWriteProtection(bool *isWriteProtected)
 {
-	*isWriteProtected = true; // XXX
+    if (isWriteProtected && *isWriteProtected) {
+        *isWriteProtected = false;
+    }
 	return kIOReturnSuccess;
 }
 
@@ -218,47 +220,69 @@ sdmmc_mem_read_block_subr(struct sdmmc_function *sf,
 
 void read_task_impl_(void *_args)
 {
-	BioArgs *args = (BioArgs *) _args;
-	IOByteCount actualByteCount;
-	int error = 0;
-	
-	if (!args) return;
-	
-	printf("read_task_impl_  sz %llu\n", args->nblks * args->that->blk_size_);
-	printf("sf->csd.sector_size %d\n", args->that->provider_->sc_fn0->csd.sector_size);
-	
-	
-	actualByteCount = args->nblks * args->that->blk_size_;
-	auto map = args->buffer->map();
-	u_char * buf = (u_char *) map->getVirtualAddress();
-	
-	for (UInt64 b = 0; b < args->nblks; ++b)
-	{
-		sdmmc_mem_single_read_block(args->that->provider_->sc_fn0,
-						    0, buf + b * 512, 512);
-		sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
-					  0, buf, 512);
-		sdmmc_go_idle_state(args->that->provider_);
-	}
-	
-	for (UInt64 b = 0; b < args->nblks; ++b)
-	{
-		printf("would: %lld  last block %d\n", args->block + b, args->that->num_blocks_ - 1);
-		//unsigned int would = args->block + b;
-        auto would = args->block + b;
-		//if ( would > 60751872 ) would = 60751871;
-		error = sdmmc_mem_read_block_subr(args->that->provider_->sc_fn0,
-				static_cast<int>(would), buf + b * 512, 512);
-		if (error) {
-			(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
-			goto out;
-		}
-	}
-	
-	(args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnSuccess, actualByteCount);
-	
+    BioArgs *args = (BioArgs *) _args;
+    IOByteCount actualByteCount;
+    int error = 0;
+    
+    printf("read_task_impl_  sz %llu\n", args->nblks * args->that->blk_size_);
+    printf("sf->csd.sector_size %d\n", args->that->provider_->sc_fn0->csd.sector_size);
+    
+    
+    actualByteCount = args->nblks * args->that->blk_size_;
+    IOByteCount maxSendBytes = 128 * 1024;
+    IOByteCount remainingBytes = args->nblks * 512;
+    IOByteCount sentBytes = 0;
+    int blocks = (int) args->block;
+    
+    u_char *buf = new u_char[actualByteCount];
+    
+    while (remainingBytes > 0) {
+        IOByteCount sendByteCount = remainingBytes > maxSendBytes ? maxSendBytes : remainingBytes;
+        
+        if (args->direction == kIODirectionIn) {
+            error = sdmmc_mem_read_block(args->that->provider_->sc_fn0, blocks, buf + sentBytes, sendByteCount);
+        }
+        else {
+            IOByteCount copied_bytes = args->buffer->readBytes(sentBytes, buf, sendByteCount);
+            if (copied_bytes == 0) {
+                delete[] buf;
+                if (args->completion.action) {
+                    (args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
+                }
+                goto out;
+            }
+            error = sdmmc_mem_write_block(args->that->provider_->sc_fn0, blocks, buf + sentBytes, sendByteCount);
+        }
+        
+        if (error) {
+            if (args->completion.action) {
+                (args->completion.action)(args->completion.target, args->completion.parameter,
+                              kIOReturnIOError, 0);
+            }
+            goto out;
+        }
+        
+        IOByteCount copied_bytes = args->buffer->writeBytes(sentBytes, buf, sendByteCount);
+        if (copied_bytes == 0) {
+            delete[] buf;
+            if (args->completion.action) {
+                (args->completion.action)(args->completion.target, args->completion.parameter, kIOReturnIOError, 0);
+            }
+            goto out;
+        }
+        
+        blocks += (sendByteCount / 512);
+        remainingBytes -= sendByteCount;
+        sentBytes += sendByteCount;
+    }
+    
+    delete[] buf;
+    if (args->completion.action) {
+        (args->completion.action)(args->completion.target, args->completion.parameter,
+                      kIOReturnSuccess, actualByteCount);
+    }
 out:
-	delete args;
+    delete args;
 }
 
 /**
